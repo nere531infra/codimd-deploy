@@ -2,16 +2,17 @@ version: '3.8'
 
 services:
   codimd:
-    image: hackmdio/hackmd:2.4.2-cjk@sha256:659d5a4c1ae50d9a83cf911f7ff5f80f3055a6ab5d461d6aa7c13b0ecec37e24
+    image: hackmdio/hackmd:2.5.4
     hostname: codimd
     container_name: codimd__codimd
     restart: unless-stopped
 
     depends_on:
-      - mariadb
+      - postgres
 
     environment:
-      CMD_DB_URL: mysql://codimd:codimd@mariadb:3306/codimd
+      CMD_DB_URL: postgres://codimd:codimd@postgres:5432/codimd
+      CMD_USECDN: "false"
       CMD_ALLOW_EMAIL_REGISTER: "false"
       CMD_DOMAIN: ${HOSTNAME}
       CMD_PROTOCOL_USESSL: "true"
@@ -22,31 +23,32 @@ services:
         source: codimd_data
         target: /home/hackmd/app/public/uploads
 
+    expose:
+      - 3000
+
     deploy:
       resources:
         limits:
           memory: 512m
 
     networks:
-      codimd_cloudflared:
-      mariadb_codimd:
+      - outband
 
-  mariadb:
-    image: mariadb:11.7.2@sha256:310d29fbb58169dcddb384b0ff138edb081e2773d6e2eceb976b3668089f2f84
-    hostname: mariadb
-    container_name: codimd__mariadb
+  postgres:
+    image: postgres:17.4
+    hostname: postgres
+    container_name: codimd__postgres
     restart: unless-stopped
 
     environment:
-      MYSQL_ROOT_PASSWORD: codimd
-      MYSQL_USER: codimd
-      MYSQL_PASSWORD: codimd
-      MYSQL_DATABASE: codimd
+      POSTGRES_USER: codimd
+      POSTGRES_PASSWORD: codimd
+      POSTGRES_DB: codimd
 
     volumes:
       - type: volume
-        source: mariadb_data
-        target: /var/lib/mysql
+        source: postgres_data
+        target: /var/lib/postgresql/data
 
     deploy:
       resources:
@@ -54,10 +56,10 @@ services:
           memory: 512m
 
     networks:
-      mariadb_codimd:
+      - outband
 
   cloudflared:
-    image: cloudflare/cloudflared:2025.4.0@sha256:522827fe6220249d72ade9a85cf5bdcc52c18ef1d13c7a3bb7480f56a0fd36e6
+    image: cloudflare/cloudflared:2025.4.0
     hostname: cloudflared
     container_name: codimd__cloudflared
     restart: unless-stopped
@@ -67,7 +69,6 @@ services:
       TUNNEL_LOGFILE: /dev/stdout
 
     command: tunnel run --token ${TUNNEL_TOKEN}
-    user: root
 
     deploy:
       resources:
@@ -75,31 +76,15 @@ services:
           memory: 128m
 
     networks:
-      codimd_cloudflared:
-      cloudflared_internet:
-      prometheus__cloudflared:
-        aliases:
-          - codimd__cloudflared
-
-networks:
-  prometheus__cloudflared:
-    name: prometheus__cloudflared
-    external: true
-
-  cloudflared_internet:
-    name: codimd__cloudflared_internet
-
-  codimd_cloudflared:
-    name: codimd__codimd_cloudflared
-    internal: true
-
-  mariadb_codimd:
-    name: codimd__mariadb_codimd
-    internal: true
+      - outband
 
 volumes:
   codimd_data:
     name: codimd__codimd_data
 
-  mariadb_data:
-    name: codimd__mariadb_data
+  postgres_data:
+    name: codimd__postgres_data
+
+networks:
+  outband:
+    name: codimd__outband
