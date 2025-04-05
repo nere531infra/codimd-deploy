@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   codimd:
-    image: hackmdio/hackmd:2.5.4
+    image: hackmdio/hackmd:2.4.2-cjk
     hostname: codimd
     container_name: codimd__codimd
     restart: unless-stopped
@@ -12,7 +12,7 @@ services:
 
     environment:
       CMD_DB_URL: postgres://codimd:codimd@postgres:5432/codimd
-      CMD_USECDN: "false"
+      CMD_USECDN: "true"
       CMD_ALLOW_EMAIL_REGISTER: "false"
       CMD_DOMAIN: ${HOSTNAME}
       CMD_PROTOCOL_USESSL: "true"
