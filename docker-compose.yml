@@ -11,7 +11,7 @@ services:
       - postgres
 
     environment:
-      CMD_DB_URL: postgres://codimd:codimd@postgres:5432/codimd
+      CMD_DB_URL: postgres://codimd:codimd@postgres/codimd
       CMD_USECDN: "true"
       CMD_ALLOW_EMAIL_REGISTER: "false"
       CMD_DOMAIN: ${HOSTNAME}
@@ -35,7 +35,7 @@ services:
       - outband
 
   postgres:
-    image: postgres:17.4
+    image: postgres:17.4-alpine
     hostname: postgres
     container_name: codimd__postgres
     restart: unless-stopped
