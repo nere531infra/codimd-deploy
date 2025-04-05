@@ -14,7 +14,7 @@ services:
       CMD_DB_URL: postgres://codimd:codimd@postgres/codimd
       CMD_USECDN: "true"
       CMD_ALLOW_EMAIL_REGISTER: "false"
-      CMD_DOMAIN: ${HOSTNAME}
+      CMD_DOMAIN: "codimd.nere531.com"
       CMD_PROTOCOL_USESSL: "true"
       CMD_AUTO_VERSION_CHECK: "false"
 
