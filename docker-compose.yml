@@ -35,7 +35,7 @@ services:
       - outband
 
   postgres:
-    image: postgres:11.6-alpine
+    image: postgres:11.22-alpine
     hostname: postgres
     container_name: codimd__postgres
     restart: unless-stopped
